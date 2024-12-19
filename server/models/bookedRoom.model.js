@@ -36,7 +36,19 @@ const bookedRoomSchema = new mongoose.Schema({
       message: (props) => `${props.value} is not a valid URL!`,
     },
   },
-  amount: {
+  totalAmount: {
+    type: Number,
+    min: 0, 
+  },
+  checkInAmount: {
+    type: Number,
+    min: 0, 
+  },
+  checkOutAmount: {
+    type: Number,
+    min: 0, 
+  },
+   remainAmount: {
     type: Number,
     min: 0, 
   },

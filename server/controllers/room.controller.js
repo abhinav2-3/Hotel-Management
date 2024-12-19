@@ -3,7 +3,7 @@ const BookedRoom = require("../models/bookedRoom.model");
 const roomModel = require("../models/room.model");
 
 module.exports.createRoom = async (req, res, next) => {
-  const { roomNumber, available, roomPrice } = req.body;
+  const { roomNumber, available, roomPrice,bedCount } = req.body;
 
   // Validate input
   if (!roomNumber || roomPrice === undefined) {
@@ -28,6 +28,7 @@ module.exports.createRoom = async (req, res, next) => {
       roomNumber,
       available: available ?? true, // Default to true if not provided
       roomPrice,
+      bedCount
     });
 
     await room.save();
@@ -134,10 +135,18 @@ module.exports.bookRoom = async (req, res) => {
     checkOut,
     numberOfPeople,
     documentNumber,
-    amount,
+    checkInAmount,
+    totalAmount,
     paymentMode,
     roomNumber,
+    documentURL,
   } = req.body;
+
+  const remainAmount = totalAmount - checkInAmount;
+//     amount,
+//     paymentMode,
+//     roomNumber,
+//   } = req.body;
 
   // Access the uploaded file
   const image = req.file;
@@ -147,6 +156,7 @@ module.exports.bookRoom = async (req, res) => {
   //     .status(400)
   //     .json({ success: false, message: "Document is required" });
   // }
+
 
   try {
     const room = await roomModel.findOne({ roomNumber });
@@ -187,8 +197,10 @@ module.exports.bookRoom = async (req, res) => {
       checkOut: checkOutDate,
       numberOfPeople,
       documentNumber,
-      // documentURL: image?.path || "",
-      amount,
+      documentURL,
+      checkInAmount,
+      totalAmount,
+      remainAmount,
       paymentMode,
       roomNumber,
     });
@@ -280,5 +292,76 @@ module.exports.getAllBookings = async (req, res) => {
       success: false,
       message: "Server error while retrieving booking details",
     });
+  }
+};
+
+module.exports.cancelBooking = async (req, res, next) => {
+  try {
+    const { roomNumber } = req.body;
+    console.log(roomNumber);
+    const updatedRoom = await Room.findOneAndUpdate(
+      { roomNumber },
+      { $set: { available: false } }
+    );
+    console.log(updatedRoom);
+    if (!updatedRoom) {
+      res.status(404).json({
+        message: "room does not exist with the Id ",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Room booking canceled successfully",
+      room: updatedRoom,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.checkoutRoom = async (req, res, next) => {
+  try {
+    const { roomNumber, checkOutAmount } = req.body;
+
+    
+    const updatedRoom = await Room.findOneAndUpdate(
+      { roomNumber },
+      { $set: { available: false } },
+      { new: true } 
+    );
+
+    if (!updatedRoom) {
+      return res.status(404).json({
+        success: false,
+        message: "Room does not exist with the provided room number.",
+      });
+    }
+    const bookedRoom = await BookedRoom.findOne({ roomNumber });
+    if (!bookedRoom) {
+      return res.status(404).json({
+        success: false,
+        message: "No booking found for the given room number.",
+      });
+    }
+
+    const remainAmount = bookedRoom.remainAmount;
+
+    const updatedBookedRoom = await BookedRoom.findOneAndUpdate(
+      { roomNumber },
+      {
+        $set: { checkOutAmount },
+        $inc: { remainAmount: -checkOutAmount }, 
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Checked out successfully.",
+      room: updatedRoom,
+      booking: updatedBookedRoom,
+    });
+  } catch (error) {
+    next(error);
   }
 };
