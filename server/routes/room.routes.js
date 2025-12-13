@@ -15,5 +15,6 @@ router.get("/getall", roomController.getAllRooms);
 router.get("/bookings", roomController.getAllBookings);
 router.post("/csvFile", download.downloadFile);
 router.get("/:roomNumber/booked-data", roomController.getBookedRoomData);
+router.get("/pdfFile", download.downloadPDFFile);
 
 module.exports = router;

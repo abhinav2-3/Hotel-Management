@@ -1,5 +1,7 @@
 const { Parser } = require("json2csv");
 const BookedRoom = require("../models/bookedRoom.model");
+const pdfMaster = require("pdf-master");
+const path = require("path");
 
 module.exports.downloadFile = async (req, res) => {
   const { fromDate, toDate } = req.body;
@@ -69,5 +71,66 @@ module.exports.downloadFile = async (req, res) => {
   } catch (error) {
     console.error("Error generating CSV:", error);
     res.status(500).send("Error generating CSV file.");
+  }
+};
+
+module.exports.downloadPDFFile = async (req, res) => {
+  try {
+    // Fetch bookings from MongoDB
+    let bookings = await BookedRoom.find(
+      {},
+      {
+        name: 1,
+        roomNumber: 1,
+        checkInAmount: 1,
+        checkOutAmount: 1,
+        totalAmount: 1,
+        paymentMode: 1,
+        numberOfDays: 1,
+        numberOfPeople: 1,
+        documentNumber: 1,
+        bookedAt: 1,
+        _id: 0,
+      }
+    ).lean(); // Use `lean()` for performance improvement
+
+    // Format `bookedAt` date
+    bookings = bookings.map((booking) => ({
+      ...booking,
+      bookedAt: booking.bookedAt
+        ? new Date(booking.bookedAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : "N/A",
+    }));
+
+    // Define PDF options
+    let options = {
+      displayHeaderFooter: true,
+      format: "A4",
+      headerTemplate: `<h3> Invoice Report </h3>`,
+      footerTemplate: `<h3> Copyright 2024 </h3>`,
+      margin: { top: "80px", bottom: "100px" },
+    };
+
+    const templatePath = path.join(
+      __dirname,
+      "../templates/invoice_template.hbs"
+    );
+
+    // Generate PDF using `bookings` data
+    let PDF = await pdfMaster.generatePdf(templatePath, bookings, options);
+
+    // Send PDF as a downloadable file
+    res.setHeader("Content-Disposition", 'attachment; filename="invoice.pdf"');
+    res.contentType("application/pdf");
+    res.status(200).send(PDF);
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error generating PDF file." });
   }
 };

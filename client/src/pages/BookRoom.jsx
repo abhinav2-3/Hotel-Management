@@ -12,6 +12,7 @@ const BookRoom = () => {
 
   let bookedRoom = [];
 
+  const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [document, setDocument] = useState(null);
   const [formData, setFormData] = useState({
@@ -62,6 +63,7 @@ const BookRoom = () => {
   }, [formData.checkIn, state, formData.checkOut, totalAmount]);
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     if (!document) {
       alert("Please upload a document.");
@@ -89,6 +91,8 @@ const BookRoom = () => {
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -255,9 +259,10 @@ const BookRoom = () => {
         {/* Submit Button */}
         <button
           type="submit"
+          disabled={loading}
           className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
         >
-          Book
+          {loading ? "Loading..." : "Book"}
         </button>
       </form>
     </div>

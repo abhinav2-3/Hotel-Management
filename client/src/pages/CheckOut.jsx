@@ -11,6 +11,7 @@ const CheckOut = () => {
   const [checkOutAmount, setChekOutAmount] = useState();
   const [paymentMode, setpaymentMode] = useState("Cash");
   const [formData, setFormData] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchBookedRoomData = async () => {
@@ -38,6 +39,7 @@ const CheckOut = () => {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     try {
       const response = await axios.put(CHECKOUT, {
@@ -52,8 +54,9 @@ const CheckOut = () => {
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message);
+    } finally {
+      setLoading(false);
     }
-    console.log(paymentMode);
   };
 
   return (
@@ -183,9 +186,10 @@ const CheckOut = () => {
         {/* Submit Button */}
         <button
           type="submit"
+          disabled={loading}
           className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
         >
-          Check Out
+          {loading ? "Loading..." : "Check Out"}
         </button>
       </form>
     </div>

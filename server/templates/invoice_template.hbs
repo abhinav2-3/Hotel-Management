@@ -1,0 +1,42 @@
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 10px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>Invoice Report</h1>
+    <img width="100" height="100" src="https://i.pinimg.com/originals/01/ca/da/01cada77a0a7d326d85b7969fe26a728.jpg" alt="Logo">
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Room Number</th>
+            <th>Check-In Amt</th>
+            <th>Check-Out Amt</th>
+            <th>Total Amount</th>
+            <th>Payment Mode</th>
+            <th>Days</th>
+            <th>People</th>
+            <th>Document No.</th>
+            <th>Booked Date</th>
+        </tr>
+        {{#each this}}
+        <tr>
+            <td>{{name}}</td>
+            <td>{{roomNumber}}</td>
+            <td>{{checkInAmount}}</td>
+            <td>{{checkOutAmount}}</td>
+            <td>{{totalAmount}}</td>
+            <td>{{paymentMode}}</td>
+            <td>{{numberOfDays}}</td>
+            <td>{{numberOfPeople}}</td>
+            <td>{{documentNumber}}</td>
+            <td>{{bookedAt}}</td>
+        </tr>
+        {{/each}}
+    </table>
+</body>
+</html>

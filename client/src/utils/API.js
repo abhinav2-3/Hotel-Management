@@ -9,3 +9,4 @@ export const BOOK_ROOM = API + "/room/bookroom";
 export const TRANSACTIONS = API + "/room/bookings";
 export const CHECKOUT = API + "/room/checkOut";
 export const DOWNLOAD_CSV = API + "/room/csvFile";
+export const DOWNLOAD_PDF = API + "/room/pdfFile";
